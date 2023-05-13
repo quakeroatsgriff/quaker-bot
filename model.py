@@ -60,7 +60,7 @@ class SelectColumns(BaseEstimator, TransformerMixin):
 
 def train_model(debug_flag):
     # data = pd.read_csv( "./csv/train.csv" )
-    data = pd.read_csv( "./csv/train.csv" ).sample(frac=0.05)
+    data = pd.read_csv( "./csv/train.csv" ).sample(frac=0.1)
     # data = pd.read_csv( "./csv/train_small.csv" )
     # data = pd.read_csv( "./csv/train_five.csv" )
     ys = data["toxic"]
@@ -72,9 +72,8 @@ def train_model(debug_flag):
     grid_params = {
         # 'vectorize__strip_accents' : ["unicode"],
         # 'vectorize__stop_words' : ["english"],
-        'vectorize__ngram_range' : [(1,3)],
+        'vectorize__ngram_range' : [(1,1)],
         'vectorize__max_features': [20000],
-        # 'vectorize__max_features': [100],
         # 'vectorize__max_df': [0.5,0.6,0.7,.8, 1],
     }
 
@@ -101,7 +100,7 @@ def train_model(debug_flag):
             'display.max_columns', None,
             'display.width', None):
             print( pipe.transform( xs ).to_csv() )
-    search = GridSearchCV( pipe, grid_params, scoring = 'accuracy', n_jobs = -1 )
+    search = GridSearchCV( pipe, grid_params, scoring = 'accuracy', n_jobs = 10 )
     # search = GridSearchCV(pipe, grid_params, scoring = 'r2', n_jobs = -1, cv = 5)
     fitted_model = search.fit( xs,ys )
     print( search.best_score_ )
