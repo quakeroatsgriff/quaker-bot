@@ -10,7 +10,8 @@ import handler
 if __name__ == "__main__":
     # Get command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--verbose', action='store_true')
+    parser.add_argument( '--verbose', action = 'store_true' )
+    parser.add_argument( '--quiet', action = 'store_true' )
     args = parser.parse_args()
 
     # Get env variables
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     @bot.event
     async def on_ready():
         """ Adds commands to bot """
-        await bot.add_cog( handler.Handler( bot ) )
+        await bot.add_cog( handler.Handler( bot, args.quiet ) )
         if ( args.verbose ):
             print( f'Logged in as {bot.user}' )
             await bot.get_channel( int(LOG_CHANNEL_ID) ).send(content="Quaker bot is online")

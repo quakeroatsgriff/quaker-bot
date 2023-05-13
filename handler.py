@@ -1,11 +1,13 @@
 import discord
 import discord.ext.commands as commands
-import model
+import model as ml
 
 class Handler( commands.Cog ):
-    def __init__( self, bot ):
+    def __init__( self, bot, is_quiet ):
         self.bot = bot
+        self.is_quiet = is_quiet
         self.model = None
+
     @commands.Cog.listener()
     async def on_member_join(self, member):
         pass
@@ -22,8 +24,8 @@ class Handler( commands.Cog ):
         if ( self.model):
             await ctx.channel.send( "Model is already trained and ready to use." )
         else:
-            await ctx.channel.send( "Training the model..." )
-            self.model = model.train_model( False )
+            if ( not self.is_quiet ):   await ctx.channel.send( "Training the model..." )
+            self.model = ml.train_model( not self.is_quiet )
             await ctx.channel.send( "Model is trained!" )
         return
 
@@ -36,7 +38,7 @@ class Handler( commands.Cog ):
         # Assemble message to send to model
         message = ' '.join( args )
         # Get response message from the prediction
-        response = model.predict_message( self.model, message )
+        response = ml.predict_message( self.model, message )
         return await ctx.channel.send( response )
 
     @commands.command()
@@ -45,3 +47,16 @@ class Handler( commands.Cog ):
         self.model = None
         return await ctx.channel.send( "Cleared the model" )
 
+    @commands.command()
+    async def pickle( self, ctx ):
+        """ Pickles the current model (serializes the object) """
+        if ( not self.is_quiet ): await ctx.channel.send( "Serializing the current trained model" )
+        ml.save_pickle( self.model, not self.is_quiet )
+        return await ctx.channel.send( "Done!" )
+
+    @commands.command()
+    async def load( self, ctx ):
+        """ Restores the model serialized on the disk """
+        if ( not self.is_quiet ): await ctx.channel.send( "Retrieving model from disk" )
+        self.model = ml.load_pickle( not self.is_quiet )
+        return await ctx.channel.send( "Done!" )

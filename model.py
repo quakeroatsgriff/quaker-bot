@@ -3,6 +3,7 @@ import numpy as np
 import re
 import sys
 import argparse
+import pickle
 
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import r2_score
@@ -58,8 +59,8 @@ class SelectColumns(BaseEstimator, TransformerMixin):
         return xs[self.columns]
 
 def train_model(debug_flag):
-    data = pd.read_csv( "./csv/train.csv" )
-    # data = pd.read_csv( "./csv/train.csv" ).sample(frac=0.7)
+    # data = pd.read_csv( "./csv/train.csv" )
+    data = pd.read_csv( "./csv/train.csv" ).sample(frac=0.05)
     # data = pd.read_csv( "./csv/train_small.csv" )
     # data = pd.read_csv( "./csv/train_five.csv" )
     ys = data["toxic"]
@@ -120,17 +121,24 @@ def predict_message( model, message ):
     input_dataframe['comment_text'] = [ message ]
     # Predict
     result = model.predict( input_dataframe ).tolist()[0]
-    print(model.predict( input_dataframe ) )
-    print( result )
     if (  result == 1 ):
         return "I think that was toxic."
     else:
         return "I don't think that was toxic."
 
+def save_pickle( model, debug_flag ):
+    """ Saves a model to disk by serializing """
+    if ( debug_flag ): print( "Saving model to file:", model )
+    pickle.dump( model, open( './models/model.pkl', 'wb') )
+
+def load_pickle( debug_flag ):
+    """ Loads a serialized model from disk """
+    return pickle.load(open('./models/model.pkl','rb'))
+
 if __name__ == "__main__":
     # Get command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('--debug', action='store_true')
+    parser.add_argument( '--debug', action = 'store_true' )
     args = parser.parse_args()
 
     train_model( debug_flag = args.debug )
