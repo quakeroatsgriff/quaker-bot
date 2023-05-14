@@ -6,7 +6,8 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 # Local modules
-import handler
+import src.handler as handler
+
 if __name__ == "__main__":
     # Get command line arguments
     parser = argparse.ArgumentParser()
@@ -23,13 +24,12 @@ if __name__ == "__main__":
 
     intents = discord.Intents.default()
     intents.message_content = True
-    # bot_client = discord.Client( intents=intents )
     bot = commands.Bot( command_prefix='$', intents=intents )
 
-    # Event that prints sucessful login
     @bot.event
     async def on_ready():
-        """ Adds commands to bot """
+        """ Event for successful login """
+        # Adds commands to bot
         await bot.add_cog( handler.Handler( bot, args.quiet, args.auto ) )
         if ( args.verbose ):
             print( f'Logged in as {bot.user}' )
