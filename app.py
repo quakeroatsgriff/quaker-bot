@@ -36,12 +36,4 @@ if __name__ == "__main__":
             await bot.get_channel( int(LOG_CHANNEL_ID) ).send(content="Quaker bot is online")
         return
 
-    @bot.command(name="sync")
-    @commands.has_permissions(administrator=True)
-    async def sync_commands_with_bot( ctx ):
-        """ Synchronizes commands with the bot """
-        await bot.add_cog( handler.Handler( bot, args.quiet, args.auto ) )
-        await ctx.channel.send( "Done!" )
-        return
-
     bot.run(TOKEN)

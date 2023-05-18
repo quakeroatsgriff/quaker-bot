@@ -88,7 +88,7 @@ def train_model(debug_flag, target = 'toxic' ):
     print("Done!",file=sys.stderr)
     return fitted_model
 
-def predict_message( model, message ):
+def predict_message( model, message, is_quiet ):
     """ Predicts if a message is toxic using the trained model"""
     # If the model does not exist, we can't predict
     if ( not model ):
@@ -99,7 +99,8 @@ def predict_message( model, message ):
     # Predict and score the percentage of how likely the message is toxic
     score = round( ( model.predict_proba( input_dataframe ).tolist()[0][1] * 100 ), 2 )
     print( message, model.predict( input_dataframe ).tolist()[0] )
-    return f"That message was { score }% toxic"
+    return f"That message was { score }% toxic." if is_quiet \
+        else f"That message was { score }% toxic. React with ✅ or ❌ to verify if your message was toxic."
 
 def save_pickle( model, debug_flag ):
     """ Saves a model to disk by serializing """
@@ -110,10 +111,17 @@ def load_pickle( debug_flag ):
     """ Loads a serialized model from disk """
     return pickle.load( open( './models/model.pkl', 'rb' ) )
 
+def find_instance( hash, dataset_file ):
+    """ Searches through the ID's of the dataset file and checks if the given
+    hash ID is present in the dataset or not """
+    dataframe = pd.read_csv( dataset_file )
+    id_column = dataframe[ 'id' ]
+    # return True if the hash is in the column, false if not
+    return hash in id_column.unique()
+
 if __name__ == "__main__":
     # Get command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument( '--debug', action = 'store_true' )
     args = parser.parse_args()
-
     model = train_model( debug_flag = args.debug )
