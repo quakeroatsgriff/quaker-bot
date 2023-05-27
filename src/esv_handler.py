@@ -1,4 +1,5 @@
 import discord.ext.commands as commands
+import discord
 import requests
 import re
 import random as rand
@@ -21,7 +22,13 @@ class ESV_Handler( commands.Cog ):
             passage = re.sub( r'\n ', '\n>', passage )
             # Passage title in bold font
             response_message = f"**{ input_message }**\n> { passage }"
-            return await ctx.channel.send( response_message )
+            try:
+                await ctx.channel.send( response_message )
+            # Passage may be too long to send over discord message. Truncate the message to the first 2000 characters
+            except discord.errors.HTTPException:
+                await self.send_response( ctx, "Passage may be too long. Truncating it.", "❌" )
+                await ctx.channel.send( response_message[:2000] )
+                return
         # Passage not found
         else:
             return await self.send_response( ctx, "Passage not found. Usage: `$retrieve <Book> <Chapter>:<Verse(s)>`", "❌" )
