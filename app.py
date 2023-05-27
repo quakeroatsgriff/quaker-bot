@@ -6,7 +6,8 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 # Local modules
-import src.handler as handler
+from src import ml_handler
+from src import esv_handler
 
 if __name__ == "__main__":
     # Get command line arguments
@@ -21,6 +22,8 @@ if __name__ == "__main__":
     TOKEN = os.getenv( 'DISCORD_TOKEN' )
     LOG_CHANNEL_ID = os.getenv( 'LOG_CHANNEL_ID' )
     OWNER_ID = os.getenv( 'OWNER_ID' )
+    ESV_API_KEY = os.getenv( 'ESV_API_KEY' )
+    ESV_API_URL = os.getenv( 'ESV_API_URL' )
 
     intents = discord.Intents.default()
     intents.message_content = True
@@ -30,7 +33,8 @@ if __name__ == "__main__":
     async def on_ready():
         """ Event for successful login """
         # Adds commands to bot
-        await bot.add_cog( handler.Handler( bot, args.quiet, args.auto ) )
+        await bot.add_cog( ml_handler.ML_Handler( bot, args.quiet, args.auto ) )
+        await bot.add_cog( esv_handler.ESV_Handler( bot, args.quiet, args.auto, ESV_API_KEY, ESV_API_URL ) )
         if ( args.verbose ):
             print( f'Logged in as {bot.user}' )
             await bot.get_channel( int(LOG_CHANNEL_ID) ).send(content="Quaker bot is online")

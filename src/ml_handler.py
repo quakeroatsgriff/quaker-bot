@@ -3,7 +3,7 @@ import src.model as ml
 import random as rand
 import asyncio
 
-class Handler( commands.Cog ):
+class ML_Handler( commands.Cog ):
     def __init__( self, bot, is_quiet, auto_load ):
         self.bot = bot
         self.is_quiet = is_quiet
