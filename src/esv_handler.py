@@ -11,8 +11,37 @@ class ESV_Handler( commands.Cog ):
         self.key = ESV_API_KEY
         self.url = ESV_API_URL
 
+    # Silly listener that listens to $retrieve messages from within matt's minecraft server
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author == self.bot.user:
+            return
+        if ( message.content.startswith( '$retrieve' ) ):
+            matches = re.findall( r"\w+|(?<=\d:)\d+|(?<=\d)-\d+", message.content )
+            matches.pop( 0 )
+            input_message = ' '.join( matches )
+            print( input_message )
+            passage = await self.get_esv_text( input_message )
+            # Print out passage if passage found
+            if ( passage ):
+                passage = re.sub( r'\n ', '\n>', passage )
+                # Passage title in bold font
+                response_message = f"**{ input_message }**\n> { passage }"
+                try:
+                    await message.channel.send( response_message )
+                # Passage may be too long to send over discord message. Truncate the message to the first 2000 characters
+                except discord.errors.HTTPException:
+                    await self.send_response( message, "Passage may be too long. Truncating it.", "❌" )
+                    await message.channel.send( response_message[:2000] )
+                    return
+            # Passage not found
+            else:
+                return await self.send_response( message, "Passage not found. Usage: `$retrieve <Book> <Chapter>:<Verse(s)>`", "❌" )
+
     @commands.command()
     async def retrieve( self, ctx, *args ):
+        #TODO
+        return
         """ Retrieves desginated passage from the ESV Bible and print it in chat """
         input_message = ' '.join( args )
         print( input_message )

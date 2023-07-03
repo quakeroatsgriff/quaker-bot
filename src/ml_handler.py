@@ -2,6 +2,7 @@ import discord.ext.commands as commands
 import src.model as ml
 import random as rand
 import asyncio
+import re
 
 class ML_Handler( commands.Cog ):
     def __init__( self, bot, is_quiet, auto_load ):
@@ -20,9 +21,27 @@ class ML_Handler( commands.Cog ):
         if ( rand.randint(0,99) == 0 ):
             # Only predict if there is a trained model and the message isn't a command
             if ( self.model and not message.content.startswith( '$' ) ):
-                return await message.channel.send( ml.predict_message( self.model, message.content ) )
+                return await message.channel.send( ml.predict_message( self.model, message.content, self.is_quiet ) )
             else:
                 return await message.channel.send( '🐴' )
+                # If the model was not trained yet, don't allow predictions
+        if ( message.content.startswith( '$predict' ) ):
+            if ( not self.model ):
+                return await self.send_response( message, "Cannot predict. The model is not trained yet", reaction = '❌' )
+            args = message.content.split(" ")
+            args.pop( 0 )
+            # Assemble message to send to model
+            model_message = ' '.join( args )
+            # Get response message from the prediction
+            response = ml.predict_message( self.model, model_message, self.is_quiet )
+            response_sent_message = await message.channel.send( response )
+            # Get reaction from user from the bot's reponse message
+            def check(reaction, user):
+                """ Checks if there was a reaction of either an X or check mark from the command author """
+                return \
+                    ( user == message.author ) and \
+                    ( str(reaction.emoji) == '✅' or str(reaction.emoji) == '❌' ) and \
+                    ( reaction.message == response_sent_message )
 
     @commands.command()
     async def hello( self, ctx ):
@@ -44,6 +63,8 @@ class ML_Handler( commands.Cog ):
 
     @commands.command()
     async def predict( self, ctx, *args ):
+        #TODO
+        return
         """ Predicts with trained ML model """
         # If the model was not trained yet, don't allow predictions
         if ( not self.model ):
